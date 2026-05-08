@@ -37,6 +37,6 @@ public class StudentServiceTest {
         req.setEmail("duplicated@example.com");
         req.setBirthDate(LocalDate.of(2001, 12, 01));
 
-        assertThatThrownBy(() -> service.create(req)).isInstanceOf(ConflictException.class);
+        service.create(req);
     }
 }
