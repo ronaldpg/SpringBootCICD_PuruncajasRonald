@@ -38,5 +38,6 @@ public class StudentServiceTest {
         req.setBirthDate(LocalDate.of(2001, 12, 01));
 
         service.create(req);
+
     }
 }
