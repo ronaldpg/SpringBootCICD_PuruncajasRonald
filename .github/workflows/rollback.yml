@@ -1,0 +1,30 @@
+name: Automatic Rollback
+
+on:
+  workflow_run:
+    workflows: ["CD"]
+    types:
+      - completed
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    # si el despliegue (CD) falló
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+
+    steps:
+      - name: Trigger Rollback via Render API
+        run: |
+          SERVICE_ID="srv-d7v4k1m7r5hc73aordhg"
+          
+          # 1. Obtener el ID del último deploy exitoso
+          LAST_SUCCESS_ID=$(curl -s -X GET "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys?status=live&limit=1" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Accept: application/json" | jq -r '.[0].id')
+
+          echo "ID del último despliegue exitoso: $LAST_SUCCESS_ID"
+
+          # Rollback
+          curl -s -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys/$LAST_SUCCESS_ID/rollback" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Accept: application/json"

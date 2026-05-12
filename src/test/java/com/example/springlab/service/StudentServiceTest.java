@@ -1,5 +1,4 @@
 package com.example.springlab.service;
-
 import com.example.springlab.domain.Student;
 import com.example.springlab.dto.StudentCreateRequest;
 import com.example.springlab.repository.StudentRepository;
@@ -37,7 +36,6 @@ public class StudentServiceTest {
         req.setEmail("duplicated@example.com");
         req.setBirthDate(LocalDate.of(2001, 12, 01));
 
-        service.create(req);
-
+        assertThatThrownBy(() -> service.create(req)).isInstanceOf(ConflictException.class);
     }
 }

@@ -9,10 +9,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Solo se ejecuta si el CI termino
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Deploy to Render
+        id: deploy_render
         run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          # Ejecutamos el curl y verificamos el código de estado HTTP
+          status=$(curl -s -o /dev/null -w "%{http_code}" -X POST ${{ secrets.RENDER_DEPLOY_HOOK }})
+          if [ "$status" -ne 200 ] && [ "$status" -ne 201 ]; then
+            echo "Error: Render respondió con $status"
+            exit 1
+          fi
+  rollback:
+    needs: deploy
+    if: failure()
+    uses: ./.github/workflows/rollback.yml
+    secrets: inherit

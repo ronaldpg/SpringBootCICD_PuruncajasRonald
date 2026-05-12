@@ -15,7 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Esto ayuda a que Git no se confunda con los submódulos antiguos
           submodules: false
 
       - name: Setup JDK 17
@@ -23,18 +22,17 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          # Esto acelera el build guardando las librerías de Gradle
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build and Test with Gradle
-        # 'build' ya ejecuta los tests por defecto, así que no necesitas dos pasos
         run: ./gradlew clean build
+        env:
+          APP_VERSION: "Build-${{ github.run_number }}-Hash-${{ github.sha }}"
 
       - name: Upload Build Artifact
-        # Esto guarda tu archivo .jar por si quieres descargarlo después
         uses: actions/upload-artifact@v4
         with:
           name: spring-boot-app
